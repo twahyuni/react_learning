@@ -20,12 +20,15 @@ const ProductList = React.createClass({
     });
     this.setState({ products: products });
   },
-  handleProductUpVote: function(productId) {
-    // productId is the function variable and it was passed by Product with handleUpVote
+  handleProductVote: function(productId, vote) {
+    // productId and vote are passed by Product with handleUpVote and handleDownVote
     // traverse Data to up-vote based on productId
     Data.forEach((el) => {
-      if (el.id === productId) {
+      if (el.id === productId && vote === 'up') {
         el.votes = el.votes + 1;
+        return;
+      }  else if (el.id === productId && vote === 'down'){
+        el.votes = el.votes - 1;
         return;
       }
     });
@@ -49,7 +52,7 @@ const ProductList = React.createClass({
             votes={product.votes}
             submitter_avatar_url={product.submitter_avatar_url}
             product_image_url={product.product_image_url}
-            onVote={this.handleProductUpVote}
+            onVote={this.handleProductVote}
           />
       );
     });
@@ -65,10 +68,13 @@ const ProductList = React.createClass({
 // Product component can't modify as this.props is immutable
 // child doesn't own props, its parent component does
 const Product = React.createClass({
+  handleDownVote: function() {
+    this.props.onVote(this.props.id, 'down');
+  },
   handleUpVote: function() {
     // tell which Product trigger the event to its parent, ProductList
     // onVote is passed down by ProductList
-    this.props.onVote(this.props.id);
+    this.props.onVote(this.props.id, 'up');
   },
   render: function() {
     return (
@@ -83,6 +89,9 @@ const Product = React.createClass({
           <div className="header">
             <a onClick={this.handleUpVote}>
               <i className='large caret up icon'></i>
+            </a>
+            <a onClick={this.handleDownVote}>
+              <i className='large caret down icon'></i>
             </a>
             {this.props.votes}
           </div>
